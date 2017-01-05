@@ -1,7 +1,5 @@
 package com.hit.algorithm;
 
-import java.net.CacheRequest;
-import java.net.CacheResponse;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
