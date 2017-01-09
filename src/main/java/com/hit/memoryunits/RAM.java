@@ -24,6 +24,11 @@ public class RAM
 		this.initialCapacity = initialCapacity;
 	}
 	
+	public int getCurrentCapacity()
+	{
+		return this.pages.size();
+	}
+	
 	public Map<Long, Page<byte[]>> getPages()
 	{
 		return this.pages;
