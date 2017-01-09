@@ -24,7 +24,7 @@ public class RAM
 		this.initialCapacity = initialCapacity;
 	}
 	
-	public int getCurrentCapacity()
+	public int getCurrentRamSize()
 	{
 		return this.pages.size();
 	}

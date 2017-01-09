@@ -28,7 +28,7 @@ public class MemoryManagementUnit
 		{
 			if(this.algo.getElement(id) == null)
 			{
-				if(this.ram.getInitialCapacity() > this.ram.getCurrentCapacity())
+				if(this.ram.getInitialCapacity() > this.ram.getCurrentRamSize())
 				{
 					newPage = HardDisk.getInstance().pageFault(id);
 					this.algo.putElement(newPage.getPageId(), newPage.getPageId());
