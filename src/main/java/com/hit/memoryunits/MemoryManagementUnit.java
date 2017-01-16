@@ -2,6 +2,7 @@ package com.hit.memoryunits;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.hit.algorithm.IAlgoCache;
@@ -22,32 +23,55 @@ public class MemoryManagementUnit
 	{
 		Long keyOfRemoveablePage;
 		Page<byte[]> newPage, pageToHd;
+		List<Long> keys = Arrays.asList(pageIds);
 		List<Page<byte[]>> requestedPages = new ArrayList<>();
 		
-		for(Long id : pageIds)
+		if(this.algo.getElement(keys) == null)
 		{
-			if(this.algo.getElement(id) == null)
+			if(this.ram.getInitialCapacity() > this.ram.getCurrentRamSize())
 			{
-				if(this.ram.getInitialCapacity() > this.ram.getCurrentRamSize())
-				{
-					newPage = HardDisk.getInstance().pageFault(id);
-					this.algo.putElement(newPage.getPageId(), newPage.getPageId());
-					this.ram.addPage(newPage);
-					requestedPages.add(newPage);
-				}
-				else
-				{
-					keyOfRemoveablePage = this.algo.putElement(id, id);
-					pageToHd = this.ram.getPage(keyOfRemoveablePage);
-					newPage = HardDisk.getInstance().pageReplacement(pageToHd, id);
-					this.ram.removePage(pageToHd);
-					this.ram.addPage(newPage);
-					requestedPages.add(newPage);
-				}
+				newPage = HardDisk.getInstance().pageFault(id);
+				this.algo.putElement(newPage.getPageId(), newPage.getPageId());
+				this.ram.addPage(newPage);
+				requestedPages.add(newPage);
 			}
 			else
-				requestedPages.add(this.ram.getPage(id));
+			{
+				keyOfRemoveablePage = this.algo.putElement(id, id);
+				pageToHd = this.ram.getPage(keyOfRemoveablePage);
+				newPage = HardDisk.getInstance().pageReplacement(pageToHd, id);
+				this.ram.removePage(pageToHd);
+				this.ram.addPage(newPage);
+				requestedPages.add(newPage);
+			}
 		}
+		else
+			requestedPages.add(this.ram.getPage(id));
+		
+//		for(Long id : pageIds)
+//		{
+//			if(this.algo.getElement(id) == null)
+//			{
+//				if(this.ram.getInitialCapacity() > this.ram.getCurrentRamSize())
+//				{
+//					newPage = HardDisk.getInstance().pageFault(id);
+//					this.algo.putElement(newPage.getPageId(), newPage.getPageId());
+//					this.ram.addPage(newPage);
+//					requestedPages.add(newPage);
+//				}
+//				else
+//				{
+//					keyOfRemoveablePage = this.algo.putElement(id, id);
+//					pageToHd = this.ram.getPage(keyOfRemoveablePage);
+//					newPage = HardDisk.getInstance().pageReplacement(pageToHd, id);
+//					this.ram.removePage(pageToHd);
+//					this.ram.addPage(newPage);
+//					requestedPages.add(newPage);
+//				}
+//			}
+//			else
+//				requestedPages.add(this.ram.getPage(id));
+//		}
 		
 		return (Page<byte[]>[]) requestedPages.toArray();
 	}
