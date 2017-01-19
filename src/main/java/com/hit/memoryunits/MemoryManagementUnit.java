@@ -9,9 +9,8 @@ import com.hit.algorithm.IAlgoCache;
 
 public class MemoryManagementUnit 
 {
-	/// TODO: change to private
-	public IAlgoCache<Long, Long> algo;
-	public RAM ram;
+	private IAlgoCache<Long, Long> algo;
+	private RAM ram;
 	
 	public MemoryManagementUnit(int ramCapacity, IAlgoCache<Long, Long> algo)
 	{
