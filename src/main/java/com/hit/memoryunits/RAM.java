@@ -1,8 +1,10 @@
 package com.hit.memoryunits;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class RAM 
 {
@@ -12,6 +14,7 @@ public class RAM
 	public RAM(int initialCapacity)
 	{
 		this.initialCapacity = initialCapacity;
+		this.pages = new HashMap<>();
 	}
 	
 	public int getInitialCapacity()
@@ -77,5 +80,21 @@ public class RAM
 	{
 		for(Page<byte[]> p : removePages)
 			this.removePage(p);
+	}
+	
+	private String getMapKeys()
+	{
+		StringBuilder sb = new StringBuilder();
+		
+		for (Entry<Long, Page<byte[]>> entry : pages.entrySet())
+			sb.append(entry.getKey() + ", ");
+		sb.setLength(sb.length() - 2);
+		
+		return sb.toString();
+	}
+	
+	public String toString()
+	{
+		return "Current Size: " + pages.size() + ", Keys: " + getMapKeys();
 	}
 }
