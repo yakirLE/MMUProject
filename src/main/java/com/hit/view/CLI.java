@@ -38,8 +38,8 @@ public class CLI
 		tokens = inputCommand.split(" ");
 		while(!isValidInput(tokens))
 		{
-			write("Not a valid command");
-			write("Please enter required algorithm and RAM capacity");
+			write("Not a valid command\r\n");
+			write("Please enter required algorithm and RAM capacity\r\n");
 			inputCommand = input.nextLine();
 			tokens = inputCommand.split(" ");
 		}
