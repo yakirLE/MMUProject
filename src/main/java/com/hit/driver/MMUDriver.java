@@ -27,6 +27,7 @@ public class MMUDriver
 	public static void main(String[] args) throws InterruptedException, InvocationTargetException 
 	{
 		int capacity;
+		boolean wasStartInitiated = false;
 		String[] configuration;
 		CLI cli = new CLI(System.in, System.out);
 		IAlgoCache<Long, Long> algo;
@@ -40,26 +41,34 @@ public class MMUDriver
 			algo = null;
 			capacity = 0;
 			if(configuration[0].equals("start"))
-				cli.write("Please enter required algorithm and RAM capacity\r\n");
-			else if(configuration[0].equals("stop"))
-				cli.write("Thank you\r\n");
-			else
 			{
-				algo = createAndGetAlgo(configuration);
-				capacity = Integer.parseInt(configuration[configuration.length - 1]);
-				mmu = new MemoryManagementUnit(capacity, algo);
-				try
+				cli.write("Please enter required algorithm and RAM capacity\r\n");
+				wasStartInitiated = true;
+			}
+			else if(wasStartInitiated)
+			{
+				if(configuration[0].equals("stop"))
+					cli.write("Thank you\r\n");
+				else
 				{
-					runConfig = readConfigurationFile();
-					processCycles = runConfig.getProcessesCycles();
-					processes = createProcesses(processCycles, mmu);
-					runProcesses(processes);
-				}
-				catch(Exception e)
-				{
-					cli.write(e.getMessage());
+					algo = createAndGetAlgo(configuration);
+					capacity = Integer.parseInt(configuration[configuration.length - 1]);
+					mmu = new MemoryManagementUnit(capacity, algo);
+					try
+					{
+						runConfig = readConfigurationFile();
+						processCycles = runConfig.getProcessesCycles();
+						processes = createProcesses(processCycles, mmu);
+						runProcesses(processes);
+					}
+					catch(Exception e)
+					{
+						cli.write(e.getMessage());
+					}
 				}
 			}
+			else
+				cli.write("You need to enter start first");
 		}
 	}
 	
