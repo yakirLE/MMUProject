@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -121,15 +122,14 @@ public class MMUDriver
 			executorService.execute(process);
 		
 		executorService.shutdown();
-		while(!executorService.isTerminated())
-			performSleep(100);
+		waitForThreadsToFinish(executorService);
 	}
 	
-	public static void performSleep(int sleepMs)
+	public static void waitForThreadsToFinish(ExecutorService executorService)
 	{
 		try 
 		{
-			Thread.sleep(sleepMs);
+			executorService.awaitTermination(10, TimeUnit.MINUTES);
 		}
 		catch (InterruptedException e) 
 		{

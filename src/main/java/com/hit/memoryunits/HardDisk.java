@@ -134,10 +134,15 @@ public class HardDisk
 	
 	public void recreateHdFile()
 	{
+		deleteHdFile();
+		createHdFile();
+		initializeHdFile();
+	}
+
+	private void deleteHdFile() 
+	{
 		File pathToHdFile = new File(DEFAULT_FILE_NAME);
 		
 		pathToHdFile.delete();
-		createHdFile();
-		initializeHdFile();
 	}
 }
