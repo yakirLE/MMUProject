@@ -3,6 +3,7 @@ package com.hit.driver;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +17,7 @@ import com.hit.algorithm.IAlgoCache;
 import com.hit.algorithm.LRUAlgoCacheImpl;
 import com.hit.algorithm.MFUAlgoCacheImpl;
 import com.hit.algorithm.SecondChanceAlgoCacheImpl;
+import com.hit.memoryunits.HardDisk;
 import com.hit.memoryunits.MemoryManagementUnit;
 import com.hit.processes.Process;
 import com.hit.processes.ProcessCycles;
@@ -44,8 +46,8 @@ public class MMUDriver
 			capacity = 0;
 			if(configuration[0].equals("start"))
 			{
-				cli.write("Please enter required algorithm and RAM capacity\r\n");
 				wasStartInitiated = true;
+				cli.write("Please enter required algorithm and RAM capacity\r\n");
 			}
 			else if(wasStartInitiated)
 			{
@@ -59,16 +61,14 @@ public class MMUDriver
 					processCycles = runConfig.getProcessesCycles();
 					processes = createProcesses(processCycles, mmu);
 					runProcesses(processes);
+					HardDisk.getInstance().recreateHdFile();
 					cli.write("Done\r\n");
+					wasStartInitiated = false;
 				}
 				catch(Exception e)
 				{
 					cli.write(e.getMessage());
 				}
-			}
-			else
-			{
-				cli.write("You need to enter start first\r\n");
 			}
 		}
 		
@@ -121,5 +121,19 @@ public class MMUDriver
 			executorService.execute(process);
 		
 		executorService.shutdown();
+		while(!executorService.isTerminated())
+			performSleep(100);
+	}
+	
+	public static void performSleep(int sleepMs)
+	{
+		try 
+		{
+			Thread.sleep(sleepMs);
+		}
+		catch (InterruptedException e) 
+		{
+			e.printStackTrace();
+		}
 	}
 }

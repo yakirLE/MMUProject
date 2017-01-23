@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,18 +19,14 @@ public class HardDisk
 	private Map<Long, Page<byte[]>> pages;
 	
 	private HardDisk()
+	{	
+		createHdFile();
+		initializeHdFile();
+	}
+
+	private void initializeHdFile()
 	{
 		Long key;
-		File pathToHdFile = new File(DEFAULT_FILE_NAME);
-		
-		try 
-		{
-			pathToHdFile.createNewFile();
-		} 
-		catch (IOException e) 
-		{
-			System.out.println("Error creating file " + DEFAULT_FILE_NAME + ". " + e.getMessage());
-		}
 		
 		pages = new HashMap<>();
 		for(Integer i = 0; i < _SIZE; i++)
@@ -45,6 +42,20 @@ public class HardDisk
 		catch (Exception e)
 		{
 			System.out.println("Error writing to file. " + e.getMessage());
+		}
+	}
+
+	private void createHdFile() 
+	{
+		File pathToHdFile = new File(DEFAULT_FILE_NAME);
+		
+		try 
+		{
+			pathToHdFile.createNewFile();
+		} 
+		catch (IOException e) 
+		{
+			System.out.println("Error creating file " + DEFAULT_FILE_NAME + ". " + e.getMessage());
 		}
 	}
 	
@@ -100,6 +111,8 @@ public class HardDisk
 	public Page<byte[]> pageFault(Long pageId) throws FileNotFoundException, IOException
 	{
 		readPagesFromHd();
+		if(pages.get(pageId) == null)
+			System.out.println("Page " + pageId + "doesnt exist in HD");
 		
 		return pages.get(pageId);
 	}
@@ -110,10 +123,21 @@ public class HardDisk
 		
 		readPagesFromHd();
 		page = pages.get(moveToRamId);
+		if(page == null)
+			System.out.println("Page " + moveToRamId + "doesnt exist in HD");
 		pages.remove(moveToRamId);
 		pages.put(moveToHdPage.getPageId(), moveToHdPage);
 		writePagesToHd();
 		
 		return page;
+	}
+	
+	public void recreateHdFile()
+	{
+		File pathToHdFile = new File(DEFAULT_FILE_NAME);
+		
+		pathToHdFile.delete();
+		createHdFile();
+		initializeHdFile();
 	}
 }
