@@ -12,7 +12,7 @@ import java.util.Map;
 
 public class HardDisk 
 {
-	private final int _SIZE = 100;
+	private final int _SIZE = 10000;
 	private final String DEFAULT_FILE_NAME = "HD.txt";
 	private static HardDisk instance = new HardDisk();
 	private Map<Long, Page<byte[]>> pages;

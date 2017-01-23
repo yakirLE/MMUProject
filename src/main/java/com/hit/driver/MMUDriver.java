@@ -5,6 +5,8 @@ import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -47,29 +49,30 @@ public class MMUDriver
 			}
 			else if(wasStartInitiated)
 			{
-				if(configuration[0].equals("stop"))
-					cli.write("Thank you\r\n");
-				else
+				cli.write("Processing...\r\n");
+				algo = createAndGetAlgo(configuration);
+				capacity = Integer.parseInt(configuration[configuration.length - 1]);
+				mmu = new MemoryManagementUnit(capacity, algo);
+				try
 				{
-					algo = createAndGetAlgo(configuration);
-					capacity = Integer.parseInt(configuration[configuration.length - 1]);
-					mmu = new MemoryManagementUnit(capacity, algo);
-					try
-					{
-						runConfig = readConfigurationFile();
-						processCycles = runConfig.getProcessesCycles();
-						processes = createProcesses(processCycles, mmu);
-						runProcesses(processes);
-					}
-					catch(Exception e)
-					{
-						cli.write(e.getMessage());
-					}
+					runConfig = readConfigurationFile();
+					processCycles = runConfig.getProcessesCycles();
+					processes = createProcesses(processCycles, mmu);
+					runProcesses(processes);
+					cli.write("Done\r\n");
+				}
+				catch(Exception e)
+				{
+					cli.write(e.getMessage());
 				}
 			}
 			else
-				cli.write("You need to enter start first");
+			{
+				cli.write("You need to enter start first\r\n");
+			}
 		}
+		
+		cli.write("Thank you\r\n");
 	}
 	
 	public static IAlgoCache<Long, Long> createAndGetAlgo(String[] tokens)
@@ -112,6 +115,11 @@ public class MMUDriver
 	
 	public static void runProcesses(List<Process> processes)
 	{
+		ExecutorService executorService = Executors.newCachedThreadPool();
 		
+		for(Process process : processes)
+			executorService.execute(process);
+		
+		executorService.shutdown();
 	}
 }

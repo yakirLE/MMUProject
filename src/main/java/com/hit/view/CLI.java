@@ -44,6 +44,9 @@ public class CLI
 			tokens = inputCommand.split(" ");
 		}
 		
+		if(tokens[0].equals("stop"))
+			tokens = null;
+		
 		return tokens;
 	}
 	

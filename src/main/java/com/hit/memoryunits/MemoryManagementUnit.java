@@ -19,7 +19,7 @@ public class MemoryManagementUnit
 	}
 	
 	@SuppressWarnings("unchecked")
-	public Page<byte[]>[] getPages(Long[] pageIds) throws IOException
+	public synchronized Page<byte[]>[] getPages(Long[] pageIds) throws IOException
 	{
 		final int firstElement = 0;
 		List<Long> keysOfRemoveablePages;
@@ -30,11 +30,13 @@ public class MemoryManagementUnit
 		Page<byte[]> pageToHd;
 		
 		keysOfRemoveablePages = this.algo.putElement(keys, keys);
+		System.out.println("Pages to get: " + Arrays.toString(pageIds));
+		System.out.println("RAM before change = " + this.ram.toString());
 		if(existingElementsInAlgo != null)
 		{
 			for(Long key : existingElementsInAlgo)
 				requestedPages.add(this.ram.getPage(key));
-			keys.removeAll(existingElementsInAlgo);
+			keys = removeExistingKeys(keys, existingElementsInAlgo);
 		}
 		
 		for(Long key : keys)
@@ -46,7 +48,7 @@ public class MemoryManagementUnit
 				requestedPages.add(newPage);
 			}
 			else
-			{			
+			{
 				pageToHd = this.ram.getPage(keysOfRemoveablePages.get(firstElement));
 				keysOfRemoveablePages.remove(firstElement);
 				newPage = HardDisk.getInstance().pageReplacement(pageToHd, key);
@@ -56,6 +58,19 @@ public class MemoryManagementUnit
 			}
 		}
 		
+		System.out.println("RAM after change = " + this.ram.toString() + "\r\n");
+		
 		return requestedPages.toArray((Page<byte[]>[]) new Page[requestedPages.size()]);
+	}
+
+	private List<Long> removeExistingKeys(List<Long> keys, List<Long> existingElementsInAlgo) 
+	{
+		List<Long> keysToInsertToAlgo = new ArrayList<>();
+		
+		for(Long k : keys)
+			if(!existingElementsInAlgo.contains(k))
+				keysToInsertToAlgo.add(k);
+		
+		return keysToInsertToAlgo;
 	}
 }

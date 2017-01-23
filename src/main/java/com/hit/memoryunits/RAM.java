@@ -87,8 +87,9 @@ public class RAM
 		StringBuilder sb = new StringBuilder();
 		
 		for (Entry<Long, Page<byte[]>> entry : pages.entrySet())
-			sb.append(entry.getKey() + ", ");
-		sb.setLength(sb.length() - 2);
+		{
+			sb.append(entry.getKey() + " ");
+		}
 		
 		return sb.toString();
 	}
