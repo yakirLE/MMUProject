@@ -112,7 +112,7 @@ public class HardDisk
 	{
 		readPagesFromHd();
 		if(pages.get(pageId) == null)
-			System.out.println("Page " + pageId + "doesnt exist in HD");
+			System.out.println("Page " + pageId + " doesnt exist in HD");
 		
 		return pages.get(pageId);
 	}
@@ -124,7 +124,7 @@ public class HardDisk
 		readPagesFromHd();
 		page = pages.get(moveToRamId);
 		if(page == null)
-			System.out.println("Page " + moveToRamId + "doesnt exist in HD");
+			System.out.println("Page " + moveToRamId + " doesnt exist in HD");
 		pages.remove(moveToRamId);
 		pages.put(moveToHdPage.getPageId(), moveToHdPage);
 		writePagesToHd();
