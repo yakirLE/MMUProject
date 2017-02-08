@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -23,6 +24,7 @@ import com.hit.memoryunits.MemoryManagementUnit;
 import com.hit.processes.Process;
 import com.hit.processes.ProcessCycles;
 import com.hit.processes.RunConfiguration;
+import com.hit.util.MMULogger;
 import com.hit.view.CLI;
 
 public class MMUDriver 
@@ -61,6 +63,8 @@ public class MMUDriver
 					runConfig = readConfigurationFile();
 					processCycles = runConfig.getProcessesCycles();
 					processes = createProcesses(processCycles, mmu);
+					MMULogger.getInstance().write("PN: " + processes.size(), Level.INFO);
+					MMULogger.getInstance().write("", Level.INFO);
 					runProcesses(processes);
 					HardDisk.getInstance().recreateHdFile();
 					cli.write("Done\r\n");
@@ -69,6 +73,7 @@ public class MMUDriver
 				catch(Exception e)
 				{
 					cli.write(e.getMessage());
+					MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
 				}
 			}
 		}
@@ -133,7 +138,7 @@ public class MMUDriver
 		}
 		catch (InterruptedException e) 
 		{
-			e.printStackTrace();
+			MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
 		}
 	}
 }

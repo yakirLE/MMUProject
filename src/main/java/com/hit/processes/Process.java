@@ -1,10 +1,13 @@
 package com.hit.processes;
 
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.hit.memoryunits.MemoryManagementUnit;
 import com.hit.memoryunits.Page;
+import com.hit.util.MMULogger;
 
 public class Process implements Runnable 
 {
@@ -32,6 +35,7 @@ public class Process implements Runnable
 	@Override
 	public void run()
 	{
+		String msgToLog;
 		List<ProcessCycle> cycles = this.processCycles.getProcessCycles();
 		List<Long> pagesId;
 		List<byte[]> data;
@@ -49,11 +53,15 @@ public class Process implements Runnable
 				{
 					page = pages[i];
 					page.setContent(data.get(i));
+					msgToLog = "GP: P" + this.processId + " " + page.getPageId() + " " + Arrays.toString(data.get(i));
+					MMULogger.getInstance().write(msgToLog, Level.SEVERE);
 				}
+				
+				MMULogger.getInstance().write("", Level.INFO);
 			}
 			catch(Exception e)
 			{
-				e.printStackTrace();
+				MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
 			}
 			
 			performSleep(cycle.getSleepMs());
@@ -68,7 +76,7 @@ public class Process implements Runnable
 		}
 		catch (InterruptedException e) 
 		{
-			e.printStackTrace();
+			MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
 		}
 	}
 }

@@ -4,8 +4,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.hit.algorithm.IAlgoCache;
+import com.hit.util.MMULogger;
 
 public class MemoryManagementUnit 
 {
@@ -16,6 +18,7 @@ public class MemoryManagementUnit
 	{
 		ram = new RAM(ramCapacity);
 		this.algo = algo;
+		MMULogger.getInstance().write("RC: " + ramCapacity, Level.INFO);
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -10,6 +10,9 @@ import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+
+import com.hit.util.MMULogger;
 
 public class HardDisk 
 {
@@ -41,7 +44,7 @@ public class HardDisk
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error writing to file. " + e.getMessage());
+			MMULogger.getInstance().write("Error writing to file. " + e.getMessage(), Level.SEVERE);
 		}
 	}
 
@@ -55,7 +58,7 @@ public class HardDisk
 		} 
 		catch (IOException e) 
 		{
-			System.out.println("Error creating file " + DEFAULT_FILE_NAME + ". " + e.getMessage());
+			MMULogger.getInstance().write("Error creating file " + DEFAULT_FILE_NAME + ". " + e.getMessage(), Level.SEVERE);
 		}
 	}
 	
@@ -85,7 +88,7 @@ public class HardDisk
 		}
 		catch (ClassNotFoundException e)
 		{
-			System.out.println("Error converting to Page type. " + e.getMessage());
+			MMULogger.getInstance().write("Error converting to Page type. " + e.getMessage(), Level.SEVERE);
 		}
 		finally
 		{
@@ -111,8 +114,7 @@ public class HardDisk
 	public Page<byte[]> pageFault(Long pageId) throws FileNotFoundException, IOException
 	{
 		readPagesFromHd();
-		if(pages.get(pageId) == null)
-			System.out.println("Page " + pageId + " doesnt exist in HD");
+		MMULogger.getInstance().write("PF: " + pageId, Level.INFO);
 		
 		return pages.get(pageId);
 	}
@@ -127,6 +129,7 @@ public class HardDisk
 			System.out.println("Page " + moveToRamId + " doesnt exist in HD");
 		pages.remove(moveToRamId);
 		pages.put(moveToHdPage.getPageId(), moveToHdPage);
+		MMULogger.getInstance().write("PR: MTH " + moveToHdPage.getPageId() + " MTR " + moveToRamId, Level.INFO);
 		writePagesToHd();
 		
 		return page;
