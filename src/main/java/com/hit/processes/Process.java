@@ -35,6 +35,7 @@ public class Process implements Runnable
 	@Override
 	public void run()
 	{
+		final String EMPTY_STRING = "";
 		String msgToLog;
 		List<ProcessCycle> cycles = this.processCycles.getProcessCycles();
 		List<Long> pagesId;
@@ -57,7 +58,7 @@ public class Process implements Runnable
 					MMULogger.getInstance().write(msgToLog, Level.SEVERE);
 				}
 				
-				MMULogger.getInstance().write("", Level.INFO);
+				MMULogger.getInstance().write(EMPTY_STRING, Level.INFO);
 			}
 			catch(Exception e)
 			{
