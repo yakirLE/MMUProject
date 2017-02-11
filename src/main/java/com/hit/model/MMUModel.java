@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +28,7 @@ import com.hit.processes.ProcessCycles;
 import com.hit.processes.RunConfiguration;
 import com.hit.util.MMULogger;
 
-public class MMUModel extends Observable implements Model 
+public class MMUModel extends Observable implements Model
 {
 	public static final String CONFIG_FILE_NAME = "Configuration.json";
 	public int numProcesses;
@@ -131,6 +132,9 @@ public class MMUModel extends Observable implements Model
 				if(!line.isEmpty())
 					commands.add(line);
 			}
+			
+			setChanged();
+			notifyObservers();
 		}
 		catch (Exception e)
 		{
