@@ -1,7 +1,9 @@
 package com.hit.model;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -69,7 +71,7 @@ public class MMUModel extends Observable implements Model
 		}
 	}
 	
-	private  List<Process> createProcesses(List<ProcessCycles> processCycles)
+	private List<Process> createProcesses(List<ProcessCycles> processCycles)
 	{
 		List<Process> processes = new ArrayList<>();
 		ProcessCycles currentProcessCycles;
@@ -109,13 +111,45 @@ public class MMUModel extends Observable implements Model
 	
 	public List<String> getCommands()
 	{
-		return commands;
+		return this.commands;
 	}
 	
 	@Override
 	public void readData()
 	{
+		String line;
+		FileReader fileReader;
+		BufferedReader bufferedReader = null;
 		
+		commands = new ArrayList<>();
+		try 
+		{
+			fileReader = new FileReader(MMULogger.DEFAULT_FILE_NAME);
+			bufferedReader = new BufferedReader(fileReader);
+			while((line = bufferedReader.readLine()) != null)
+			{
+				if(!line.isEmpty())
+					commands.add(line);
+			}
+		}
+		catch (Exception e)
+		{
+			MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
+		}
+		finally
+		{
+			try
+			{
+				if(bufferedReader != null)
+					bufferedReader.close();
+			}
+			catch(IOException e)
+			{
+				MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
+			}
+		}
+		
+		System.out.println(commands.toString());
 	}
 	
 	@Override

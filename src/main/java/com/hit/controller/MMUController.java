@@ -15,6 +15,5 @@ public class MMUController implements Controller, Observer
 	
 	public void update(Observable o, Object arg)
 	{
-		
 	}
 }
