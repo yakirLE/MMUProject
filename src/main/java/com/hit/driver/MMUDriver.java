@@ -38,5 +38,7 @@ public class MMUDriver
 				wasStartInitiated = false;
 			}
 		}
+		
+		cli.write("Thank you.\r\n");
 	}
 }
