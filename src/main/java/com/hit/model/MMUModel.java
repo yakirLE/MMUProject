@@ -132,9 +132,6 @@ public class MMUModel extends Observable implements Model
 				if(!line.isEmpty())
 					commands.add(line);
 			}
-			
-			setChanged();
-			notifyObservers();
 		}
 		catch (Exception e)
 		{
@@ -152,8 +149,6 @@ public class MMUModel extends Observable implements Model
 				MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
 			}
 		}
-		
-		System.out.println(commands.toString());
 	}
 	
 	@Override
@@ -174,6 +169,8 @@ public class MMUModel extends Observable implements Model
 			MMULogger.getInstance().write(EMPTY_STRING, Level.INFO);
 			runProcesses(processes);
 			HardDisk.getInstance().recreateHdFile();
+			setChanged();
+			notifyObservers();
 		}
 		catch(Exception e)
 		{
