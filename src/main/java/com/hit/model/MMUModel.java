@@ -128,10 +128,8 @@ public class MMUModel extends Observable implements Model
 			fileReader = new FileReader(MMULogger.DEFAULT_FILE_NAME);
 			bufferedReader = new BufferedReader(fileReader);
 			while((line = bufferedReader.readLine()) != null)
-			{
 				if(!line.isEmpty())
 					commands.add(line);
-			}
 		}
 		catch (Exception e)
 		{
