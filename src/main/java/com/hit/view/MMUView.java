@@ -3,6 +3,8 @@ package com.hit.view;
 import java.util.List;
 import java.util.Observable;
 
+import javax.swing.SwingUtilities;
+
 public class MMUView extends Observable implements View 
 {
 	public static final int BYTES_IN_PAGE = 1;
@@ -15,6 +17,21 @@ public class MMUView extends Observable implements View
 	
 	@Override
 	public void open()
+	{
+		SwingUtilities.invokeLater(new Runnable() 
+		{
+			@Override
+			public void run() 
+			{
+				createAndShowGui();
+			}
+		});
+		
+		setChanged();
+		notifyObservers();
+	}
+	
+	private void createAndShowGui() 
 	{
 		
 	}

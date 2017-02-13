@@ -37,9 +37,8 @@ public class MMUController implements Controller, Observer
 	private List<String> createConfigurationFromModel()
 	{
 		List<String> configuration = new ArrayList<>();
-		MMUModel asMMUModel;
+		MMUModel asMMUModel = (MMUModel)model;
 		
-		asMMUModel = (MMUModel)model;
 		configuration.add(Integer.toString(asMMUModel.ramCapacity));
 		configuration.add(Integer.toString(asMMUModel.numProcesses));
 		configuration.addAll(asMMUModel.getCommands());
