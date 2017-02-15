@@ -27,6 +27,8 @@ public class CountersPanel extends JPanel implements ActionListener
 		pageReplacementLabel = new JLabel("Page Replacement Amount");
 		pageFaultTextField = new JTextField("0", 2);
 		pageReplacementTextField = new JTextField("0", 2);
+		pageFaultTextField.setEditable(false);
+		pageReplacementTextField.setEditable(false);
 		setLayout(new GridBagLayout());
 		constraints.anchor = GridBagConstraints.LINE_START;
 		constraints.insets = new Insets(0, 0, 0, 20);
