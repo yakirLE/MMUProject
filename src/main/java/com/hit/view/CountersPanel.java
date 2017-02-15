@@ -21,28 +21,64 @@ public class CountersPanel extends JPanel
 	
 	public CountersPanel() 
 	{
+		setLayout(new GridBagLayout());
+		createAndAddPageFaultLabel();
+		createAndAddPageFaultTextField();
+		createAndAddPageReplacementLabel();
+		createAndAddPageReplacementTextField();
+	}
+	
+	public JTextField getPageFaultTextField()
+	{
+		return this.pageFaultTextField;
+	}
+	
+	public JTextField getPageReplacementTextField()
+	{
+		return this.pageReplacementTextField;
+	}
+	
+	private void createAndAddPageFaultLabel()
+	{
 		GridBagConstraints constraints = new GridBagConstraints();
 		
 		pageFaultLabel = new JLabel("Page Fault Amount");
-		pageReplacementLabel = new JLabel("Page Replacement Amount");
-		pageFaultTextField = new JTextField("0", 2);
-		pageReplacementTextField = new JTextField("0", 2);
-		pageFaultTextField.setEditable(false);
-		pageReplacementTextField.setEditable(false);
-		setLayout(new GridBagLayout());
 		constraints.anchor = GridBagConstraints.LINE_START;
 		constraints.insets = new Insets(0, 0, 0, 20);
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		add(pageFaultLabel, constraints);
-		constraints.gridx = 2;
-		constraints.gridy = 0;
-		constraints.insets = new Insets(0, 0, 0, 0);
-		add(pageFaultTextField, constraints);
+	}
+	
+	private void createAndAddPageReplacementLabel()
+	{
+		GridBagConstraints constraints = new GridBagConstraints();
+		
+		pageReplacementLabel = new JLabel("Page Replacement Amount");
 		constraints.gridx = 0;
 		constraints.gridy = 1;
 		constraints.insets = new Insets(0, 0, 0, 20);
 		add(pageReplacementLabel, constraints);
+	}
+	
+	private void createAndAddPageFaultTextField()
+	{
+		GridBagConstraints constraints = new GridBagConstraints();
+		
+		pageFaultTextField = new JTextField("0", 2);
+		pageFaultTextField.setEditable(false);
+		constraints.gridx = 2;
+		constraints.gridy = 0;
+		constraints.insets = new Insets(0, 0, 0, 0);
+		add(pageFaultTextField, constraints);
+	}
+	
+	private void createAndAddPageReplacementTextField()
+	{
+		GridBagConstraints constraints = new GridBagConstraints();
+		
+		pageReplacementTextField = new JTextField("0", 2);
+		pageReplacementTextField.setEditable(false);
 		constraints.gridx = 2;
 		constraints.gridy = 1;
 		constraints.insets = new Insets(0, 0, 0, 0);

@@ -1,7 +1,6 @@
 package com.hit.view;
 
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -12,16 +11,20 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-public class ListPanel extends JPanel implements ActionListener 
+public class ListPanel extends JPanel implements ListSelectionListener
 {
 	private JList<String> list;
 	private JLabel processesLabel;
+	private MMUView view;
 
-	public ListPanel(String[] listObjects) 
+	public ListPanel(MMUView view, String[] listObjects) 
 	{
 		JScrollPane scrollPane;
 		
+		this.view = view;
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		createLabel();
 		createList(listObjects);
@@ -29,8 +32,9 @@ public class ListPanel extends JPanel implements ActionListener
 		add(Box.createRigidArea(new Dimension(0, 5)));
 		scrollPane = createScrollPanel();
 		add(scrollPane);
+		list.addListSelectionListener(this);
 	}
-
+	
 	private JScrollPane createScrollPanel() 
 	{
 		JScrollPane scrollPane;
@@ -55,11 +59,13 @@ public class ListPanel extends JPanel implements ActionListener
 		processesLabel = new JLabel("Processes");
 		processesLabel.setAlignmentX(LEFT_ALIGNMENT);
 	}
-	
+
 	@Override
-	public void actionPerformed(ActionEvent e) 
+	public void valueChanged(ListSelectionEvent e) 
 	{
-		
+		if(e.getValueIsAdjusting())
+			return;
+		this.view.processesList_Clicked(this.list.getSelectedValuesList());
 	}
 	
 }

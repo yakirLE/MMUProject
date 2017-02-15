@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import javax.security.auth.login.Configuration;
+
 import com.hit.model.MMUModel;
 import com.hit.model.Model;
 import com.hit.view.MMUView;
@@ -41,7 +43,7 @@ public class MMUController implements Controller, Observer
 		
 		configuration.add(Integer.toString(asMMUModel.ramCapacity));
 		configuration.add(Integer.toString(asMMUModel.numProcesses));
-		configuration.addAll(asMMUModel.getCommands());
+		configuration.addAll(asMMUModel.getCommands().subList(2, asMMUModel.getCommands().size() - 1));
 		
 		return configuration;
 	}

@@ -18,16 +18,25 @@ public class RamPanel extends JPanel
 	
 	public RamPanel(int ramCapacity, int dataSize) 
 	{
-		super(new GridLayout(1,0));
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		
 		this.ramCapacity = ramCapacity;
 		this.dataSize = dataSize;
 		table = new JTable(new RamTableModel(this.dataSize, this.ramCapacity));
-		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-		table.setDefaultRenderer(Integer.class, centerRenderer);
+		centerDataInCells();
 		setLayout(new BorderLayout());
 		add(table.getTableHeader(), BorderLayout.PAGE_START);
 		add(table);
+	}
+
+	public JTable getRamTable()
+	{
+		return this.table;
+	}
+	
+	public void centerDataInCells()
+	{
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		
+		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+		table.setDefaultRenderer(Integer.class, centerRenderer);
 	}
 }
