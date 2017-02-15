@@ -165,7 +165,7 @@ public class MMUModel extends Observable implements Model
 			this.numProcesses = processes.size();
 			MMULogger.getInstance().write("PN: " + this.numProcesses, Level.INFO);
 			MMULogger.getInstance().write(EMPTY_STRING, Level.INFO);
-			runProcesses(processes);
+//			runProcesses(processes);
 			HardDisk.getInstance().recreateHdFile();
 			setChanged();
 			notifyObservers();

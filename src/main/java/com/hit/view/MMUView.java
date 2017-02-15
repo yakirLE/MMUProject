@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Observable;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 public class MMUView extends Observable implements View 
@@ -63,40 +64,33 @@ public class MMUView extends Observable implements View
         buttons.setOpaque(true);
         list = new ListPanel();
         list.setOpaque(true);
-        constraints.anchor = GridBagConstraints.FIRST_LINE_START;
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.weightx = 0.8;
-        constraints.gridwidth = 2;
-        constraints.insets = new Insets(20, 0, 0, 0);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        frame.getContentPane().add(table, constraints);
-        constraints.anchor = GridBagConstraints.FIRST_LINE_END;
-        constraints.gridx = 2;
-        constraints.gridy = 0;
-        constraints.weightx = 0.04;
-        constraints.gridwidth = 1;
-        constraints.insets = new Insets(50, 10, 0, 10);
-        frame.getContentPane().add(counters, constraints);
-        constraints.anchor = GridBagConstraints.CENTER;
-        constraints.gridx = 0;
-        constraints.gridy = 6;
-        constraints.weightx = 0;
-        constraints.weighty = 0;
-        constraints.gridwidth = 0;
-        constraints.insets = new Insets(40, 0, 40, 600);
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        frame.getContentPane().add(buttons, constraints);
-        constraints.anchor = GridBagConstraints.CENTER;
-        constraints.gridx = 2;
-        constraints.gridy = 6;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.gridwidth = 8;
-        constraints.insets = new Insets(20, 40, 0, 0);
-//        constraints.fill = GridBagConstraints.BOTH;
-        frame.getContentPane().add(list, constraints);
+//        createPanelWithConstraints(table, GridBagConstraints.FIRST_LINE_START, 0, 0, 0, 0, 0, 0, new Insets(20, 0, 50, 0), GridBagConstraints.HORIZONTAL);
+//        createPanelWithConstraints(buttons, GridBagConstraints.CENTER, 2, 12, 0, 0, 0, 0, new Insets(40, 0, 40, 600), GridBagConstraints.NONE);
+//        createPanelWithConstraints(list, GridBagConstraints.LINE_START, 1, 6, 0.5, 0, 0, 0, new Insets(150, 40, 20, 0), GridBagConstraints.NONE);
+//        createPanelWithConstraints(counters, GridBagConstraints.LINE_END, 4, 6, 0, 0, 1, 0, new Insets(50, 10, 0, 10), GridBagConstraints.NONE);
+        createPanelWithConstraints(table, GridBagConstraints.FIRST_LINE_START, 0, 0, 0, 0, 0, 0, new Insets(0, 0, 0, 0), GridBagConstraints.HORIZONTAL);
+        createPanelWithConstraints(list, GridBagConstraints.LINE_START, 0, 0, 0, 0, 0, 0, new Insets(130, 20, 20, 0), GridBagConstraints.NONE);
+        createPanelWithConstraints(buttons, GridBagConstraints.CENTER, 0, 0, 0, 0, 0, 0, new Insets(0, 200, 0, 300), GridBagConstraints.NONE);
+        createPanelWithConstraints(counters, GridBagConstraints.LINE_END, 0, 0, 0, 0, 0, 0, new Insets(0, 0, 0, 20), GridBagConstraints.NONE);
+        
         frame.pack();
         frame.setVisible(true);
+	}
+	
+	private void createPanelWithConstraints(JPanel panel, int anchor, int gridx, int gridy, double weightx, double weighty, 
+			int gridwidth, int gridheight, Insets insets, int fill)
+	{
+		GridBagConstraints constraints = new GridBagConstraints();
+		
+		constraints.anchor = anchor;
+        constraints.gridx = gridx;
+        constraints.gridy = gridy;
+        constraints.weightx = weightx;
+        constraints.weighty = weighty;
+        constraints.gridwidth = gridwidth;
+        constraints.gridheight = gridheight;
+        constraints.insets = insets;
+        constraints.fill = fill;
+		this.frame.getContentPane().add(panel, constraints);
 	}
 }
