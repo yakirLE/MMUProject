@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
-public class RamPanel extends JPanel implements ActionListener
+public class RamPanel extends JPanel
 {
 	private int ramCapacity;
 	private int dataSize;
@@ -30,11 +30,4 @@ public class RamPanel extends JPanel implements ActionListener
 		add(table.getTableHeader(), BorderLayout.PAGE_START);
 		add(table);
 	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) 
-	{
-		
-	}
-
 }

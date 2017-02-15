@@ -12,7 +12,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-public class CountersPanel extends JPanel implements ActionListener
+public class CountersPanel extends JPanel
 {
 	private JLabel pageFaultLabel;
 	private JLabel pageReplacementLabel;
@@ -48,12 +48,4 @@ public class CountersPanel extends JPanel implements ActionListener
 		constraints.insets = new Insets(0, 0, 0, 0);
 		add(pageReplacementTextField, constraints);
 	}
-	
-	@Override
-	public void actionPerformed(ActionEvent e) 
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
 }

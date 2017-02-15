@@ -17,25 +17,43 @@ public class ListPanel extends JPanel implements ActionListener
 {
 	private JList<String> list;
 	private JLabel processesLabel;
-	private String[] processes = {"process1", "process2", "process3", "process4", "process5", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
 
-	public ListPanel() 
+	public ListPanel(String[] listObjects) 
 	{
 		JScrollPane scrollPane;
 		
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		processesLabel = new JLabel("Processes");
-		processesLabel.setAlignmentX(LEFT_ALIGNMENT);
-		list = new JList<>(processes);
-		list.setVisibleRowCount(15);
-		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-		list.setAlignmentX(LEFT_ALIGNMENT);
+		createLabel();
+		createList(listObjects);
 		add(processesLabel);
 		add(Box.createRigidArea(new Dimension(0, 5)));
+		scrollPane = createScrollPanel();
+		add(scrollPane);
+	}
+
+	private JScrollPane createScrollPanel() 
+	{
+		JScrollPane scrollPane;
+		
 		scrollPane = new JScrollPane(list);
 		scrollPane.setAlignmentX(LEFT_ALIGNMENT);
 		scrollPane.setPreferredSize(new Dimension(90, 290));
-		add(scrollPane);
+		
+		return scrollPane;
+	}
+
+	private void createList(String[] listObjects) 
+	{
+		list = new JList<>(listObjects);
+		list.setVisibleRowCount(15);
+		list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		list.setAlignmentX(LEFT_ALIGNMENT);
+	}
+
+	private void createLabel() 
+	{
+		processesLabel = new JLabel("Processes");
+		processesLabel.setAlignmentX(LEFT_ALIGNMENT);
 	}
 	
 	@Override

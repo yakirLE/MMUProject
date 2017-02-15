@@ -61,7 +61,7 @@ public class MMUView extends Observable implements View
         counters.setOpaque(true);
         buttons = new ButtonsPanel();
         buttons.setOpaque(true);
-        list = new ListPanel();
+        list = new ListPanel(getProcesses(Integer.parseInt(commands.get(PROCESSES_NUMBER_INDEX))));
         list.setOpaque(true);
         createPanelWithConstraints(table, GridBagConstraints.FIRST_LINE_START, 0, 0, 0, 0, 0, 0, new Insets(20, 0, 0, 0), GridBagConstraints.HORIZONTAL);
         createPanelWithConstraints(list, GridBagConstraints.LINE_START, 0, 0, 0, 0, 0, 0, new Insets(130, 20, 20, 0), GridBagConstraints.NONE);
@@ -86,5 +86,16 @@ public class MMUView extends Observable implements View
         constraints.insets = insets;
         constraints.fill = fill;
 		this.frame.getContentPane().add(panel, constraints);
+	}
+	
+	private String[] getProcesses(int processesNumber)
+	{
+		String[] names;
+		
+		names = new String[processesNumber];
+		for(int i = 0; i < processesNumber; i++)
+			names[i] = "Process" + i;
+		
+		return names;
 	}
 }
