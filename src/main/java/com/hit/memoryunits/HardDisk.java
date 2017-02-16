@@ -125,8 +125,6 @@ public class HardDisk
 		
 		readPagesFromHd();
 		page = pages.get(moveToRamId);
-		if(page == null)
-			System.out.println("Page " + moveToRamId + " doesnt exist in HD");
 		pages.remove(moveToRamId);
 		pages.put(moveToHdPage.getPageId(), moveToHdPage);
 		MMULogger.getInstance().write("PR: MTH " + moveToHdPage.getPageId() + " MTR " + moveToRamId, Level.INFO);
