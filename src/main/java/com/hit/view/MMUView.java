@@ -324,6 +324,7 @@ public class MMUView extends Observable implements View
 	{
 		str = str.replaceAll(".*\\[", EMPTY_STRING);
 		str = str.replace("]", EMPTY_STRING);
+		str = str.replaceAll(",", EMPTY_STRING);
 		
 		return str;
 	}
@@ -342,6 +343,5 @@ public class MMUView extends Observable implements View
 	{
 		for(int i = 0; i < BYTES_IN_PAGE; i++)
 			this.table.getRamTable().getModel().setValueAt(data.get(i), i, index);
-		this.table.centerDataInCells();
 	}
 }
