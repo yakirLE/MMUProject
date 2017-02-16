@@ -28,11 +28,21 @@ public class ListPanel extends JPanel implements ListSelectionListener
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		createLabel();
 		createList(listObjects);
+		selectAllItemsInList();
 		add(processesLabel);
 		add(Box.createRigidArea(new Dimension(0, 5)));
 		scrollPane = createScrollPanel();
 		add(scrollPane);
 		list.addListSelectionListener(this);
+	}
+
+	private void selectAllItemsInList() 
+	{
+		int start = 0;
+		int end = list.getModel().getSize() - 1;
+		
+		if(end >= 0)
+			list.setSelectionInterval(start, end);
 	}
 	
 	private JScrollPane createScrollPanel() 

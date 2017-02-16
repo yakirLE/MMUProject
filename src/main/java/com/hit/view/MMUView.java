@@ -6,8 +6,11 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Observable;
+import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -19,12 +22,18 @@ public class MMUView extends Observable implements View
 	public static final int BYTES_IN_PAGE = 5;
 	public static final int NUM_MMU_PAGES = 1;
 	private static final String EMPTY_STRING = "";
+	private int ramCapacity;
 	private int currentCommandToPlayIndex;
+	private int ramIndex;
 	private int pageFaultCounter;
 	private int pageReplacementCounter;
-	private JFrame frame;
+	private boolean isRamFull;
+	private Map<String, String> pageReplacementMap;
+	private Map<String, Integer> pageLocationInRamMap;
+	private Map<String, String> indexOfProcessesInRamMap;
 	private List<String> processsesCurrentlySelected;
 	private List<String> commands;
+	private JFrame frame;
 	private RamPanel table;
 	private CountersPanel counters;
 	private ButtonsPanel buttons;
@@ -36,7 +45,12 @@ public class MMUView extends Observable implements View
 		this.currentCommandToPlayIndex = 0;
 		this.pageFaultCounter = 0;
 		this.pageReplacementCounter = 0;
+		this.ramIndex = 0;
+		this.isRamFull = false;
 		this.processsesCurrentlySelected = new ArrayList<>();
+		this.pageReplacementMap = new HashMap<>();
+		this.pageLocationInRamMap = new HashMap<>();
+		this.indexOfProcessesInRamMap = new HashMap<>();
 	}
 	
 	@Override
@@ -67,15 +81,17 @@ public class MMUView extends Observable implements View
 	{
 		final int RAM_CAPACITY_INDEX = 0;
 		final int PROCESSES_NUMBER_INDEX = 1;
+		int processesAmount = Integer.parseInt(commands.get(PROCESSES_NUMBER_INDEX));
 		
+		this.ramCapacity = Integer.parseInt(commands.get(RAM_CAPACITY_INDEX));
 		this.commands = commands.subList(2, commands.size() - 1);
-		table = new RamPanel(Integer.parseInt(commands.get(RAM_CAPACITY_INDEX)), BYTES_IN_PAGE);
+		table = new RamPanel(this.ramCapacity, BYTES_IN_PAGE);
         table.setOpaque(true);
         counters = new CountersPanel();
         counters.setOpaque(true);
         buttons = new ButtonsPanel(this);
         buttons.setOpaque(true);
-        list = new ListPanel(this, getProcesses(Integer.parseInt(commands.get(PROCESSES_NUMBER_INDEX))));
+        list = new ListPanel(this, getProcessesAndInitializeCurrentlySelectedProcesses(processesAmount));
         list.setOpaque(true);
         createPanelWithConstraints(table, GridBagConstraints.FIRST_LINE_START, 0, 0, 0, 0, 0, 0, new Insets(20, 0, 0, 0), GridBagConstraints.HORIZONTAL);
         createPanelWithConstraints(list, GridBagConstraints.LINE_START, 0, 0, 0, 0, 0, 0, new Insets(130, 20, 20, 0), GridBagConstraints.NONE);
@@ -102,13 +118,14 @@ public class MMUView extends Observable implements View
 		this.frame.getContentPane().add(panel, constraints);
 	}
 	
-	private String[] getProcesses(int processesNumber)
+	private String[] getProcessesAndInitializeCurrentlySelectedProcesses(int processesNumber)
 	{
 		String[] names;
 		
 		names = new String[processesNumber];
 		for(int i = 0; i < processesNumber; i++)
 			names[i] = "Process" + i;
+		this.processsesCurrentlySelected = Arrays.asList(names);
 		
 		return names;
 	}
@@ -124,54 +141,125 @@ public class MMUView extends Observable implements View
 		} 
 		catch (IOException e) 
 		{
+			/// TODO use MMULogger
 			e.printStackTrace();
 		}
 	}
 	
 	public void playAllButton_Clicked()
-	{			
+	{
+		while(currentCommandToPlayIndex < this.commands.size())
+			playButton_Clicked();
+		JOptionPane.showMessageDialog(null, "Done");
 	}
 	
 	public void processesList_Clicked(List<String> processesPicked)
 	{
+		this.processsesCurrentlySelected = processesPicked;
 	}
 	
 	private void processCommand() throws IOException
 	{
-		String currentProcess;
-		String currentPage;
-		String currentData;
 		String currentCommand;
-		String[] splittedCommand;
 		
 		currentCommand = this.commands.get(this.currentCommandToPlayIndex++);
+		System.out.println(currentCommand);
 		if(currentCommand.startsWith("PF"))
 			this.counters.getPageFaultTextField().setText(Integer.toString(++this.pageFaultCounter));
 		else if(currentCommand.startsWith("PR"))
-			this.counters.getPageReplacementTextField().setText(Integer.toString(++this.pageReplacementCounter));
+			handlePageReplacementCommand(currentCommand);
 		else if(currentCommand.startsWith("GP"))
-		{
-			System.out.println(currentCommand);
-			currentCommand = currentCommand.replace("GP: ", EMPTY_STRING);
-			splittedCommand = currentCommand.split(" ");
-			currentProcess = splittedCommand[0];
-			currentPage = splittedCommand[1];
-			currentData = currentCommand.replaceAll(".*\\[", EMPTY_STRING);
-			System.out.println(getProcessID(currentProcess));
-			this.table.getRamTable().getTableHeader().getColumnModel().getColumn(4).setHeaderValue(currentPage);
-			this.table.getRamTable().getTableHeader().repaint();
-			setDataForPage(getData(currentData));
-		}
+			handleGetPagesCommand(currentCommand);
 		else
 			throw new IOException();
 	}
-	
-	private int getProcessID(String str)
+
+	private void handlePageReplacementCommand(String currentCommand) 
 	{
-		return Integer.parseInt(str.replaceAll("[a-zA-Z]", EMPTY_STRING));
+		String[] pagesToReplace;
+		
+		this.counters.getPageReplacementTextField().setText(Integer.toString(++this.pageReplacementCounter));
+		pagesToReplace = currentCommand.split(" ");
+		this.pageReplacementMap.put(pagesToReplace[4], pagesToReplace[2]);
+	}
+
+	private void handleGetPagesCommand(String currentCommand) 
+	{
+		String currentProcess;
+		String currentPage;
+		String currentData;
+		String[] splittedCommand;
+		
+		currentCommand = currentCommand.replace("GP: ", EMPTY_STRING);
+		splittedCommand = currentCommand.split(" ");
+		currentProcess = getProcessID(splittedCommand[0]);
+		currentPage = splittedCommand[1];
+		currentData = getDataAsString(currentCommand);
+		if(/*this.processsesCurrentlySelected.contains("Process" + currentProcess) && */!doesPageExistInRam(currentPage))
+		{
+			checkIfRamIsFull();
+			this.pageLocationInRamMap.put(currentPage, ramIndex);
+			this.table.getRamTable().getTableHeader().getColumnModel().getColumn(getRamIndex(currentPage)).setHeaderValue(currentPage);
+			this.table.getRamTable().getTableHeader().repaint();
+			setDataForPage(getDataAsList(currentData));
+			increaseRamIndexIfNeeded();
+		}
+	}
+
+	private void checkIfRamIsFull() 
+	{
+		if(this.ramIndex == this.ramCapacity)
+			this.isRamFull = true;
 	}
 	
-	private List<String> getData(String str)
+	private void increaseRamIndexIfNeeded()
+	{
+		if(!this.isRamFull)
+			this.ramIndex++;
+	}
+	
+	private int getRamIndex(String currentPage)
+	{
+		int index;
+		
+		if(this.isRamFull)
+		{
+			index = this.pageLocationInRamMap.get(pageReplacementMap.get(currentPage));
+			this.pageLocationInRamMap.remove(pageReplacementMap.get(currentPage));
+			this.pageLocationInRamMap.put(currentPage, index);
+			this.ramIndex = index;
+		}
+		else
+			index = this.ramIndex;
+		
+		return index;
+	}
+	
+	private boolean doesPageExistInRam(String pageNumber)
+	{
+		boolean pageExistInRam = false;
+		
+		for(int i = 0; i < this.ramCapacity; i++)
+			if(this.table.getRamTable().getTableHeader().getColumnModel().getColumn(i).getHeaderValue().equals(pageNumber))
+				pageExistInRam = true;
+		
+		return pageExistInRam;
+	}
+	
+	private String getProcessID(String str)
+	{
+		return str.replaceAll("[a-zA-Z]", EMPTY_STRING);
+	}
+	
+	private String getDataAsString(String str)
+	{
+		str = str.replaceAll(".*\\[", EMPTY_STRING);
+		str = str.replace("]", EMPTY_STRING);
+		
+		return str;
+	}
+	
+	private List<String> getDataAsList(String str)
 	{
 		String newString = str;
 		String[] data;
@@ -187,7 +275,7 @@ public class MMUView extends Observable implements View
 	private void setDataForPage(List<String> data)
 	{
 		for(int i = 0; i < BYTES_IN_PAGE; i++)
-			this.table.getRamTable().getModel().setValueAt(data.get(i), i, 4);
+			this.table.getRamTable().getModel().setValueAt(data.get(i), i, ramIndex);
 		this.table.centerDataInCells();
 	}
 }
