@@ -33,6 +33,7 @@ public class CLI
 	{
 		String inputCommand;
 		String[] tokens;
+	
 		
 		inputCommand = input.nextLine();
 		tokens = inputCommand.split(" ");
@@ -44,8 +45,24 @@ public class CLI
 			tokens = inputCommand.split(" ");
 		}
 		
+		tokens = combineFirstTwoCellsIfNeeded(tokens);
 		if(tokens[0].equals("stop"))
 			tokens = null;
+		
+		return tokens;
+	}
+
+	private String[] combineFirstTwoCellsIfNeeded(String[] tokens) 
+	{
+		String[] tmp;
+		
+		if(tokens.length == 3)
+		{
+			tmp = new String[2];
+			tmp[0] = tokens[0] + " " + tokens[1];
+			tmp[1] = tokens[2];
+			tokens = tmp;
+		}
 		
 		return tokens;
 	}

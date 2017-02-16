@@ -31,6 +31,9 @@ import com.hit.util.MMULogger;
 public class MMUModel extends Observable implements Model
 {
 	public static final String CONFIG_FILE_NAME = "Configuration.json";
+	private final String LRU_MODEL = "LRU";
+	private final String MFU_MODEL = "MFU";
+	private final String SECOND_CHANCE_MODEL = "Second Chance";
 	public int numProcesses;
 	public int ramCapacity;
 	private List<String> commands;
@@ -100,11 +103,11 @@ public class MMUModel extends Observable implements Model
 		IAlgoCache<Long, Long> algo = null;
 
 		this.ramCapacity = Integer.parseInt(tokens[tokens.length - 1]);
-		if(algoToken.equals("LRU"))
+		if(algoToken.equals(LRU_MODEL))
 			algo = new LRUAlgoCacheImpl<>(this.ramCapacity);
-		else if(algoToken.equals("MFU"))
+		else if(algoToken.equals(MFU_MODEL))
 			algo = new MFUAlgoCacheImpl<>(this.ramCapacity);
-		else if(algoToken.equals("Second"))
+		else if(algoToken.equals(SECOND_CHANCE_MODEL))
 			algo = new SecondChanceAlgoCacheImpl<>(this.ramCapacity);
 		
 		return algo;
@@ -165,7 +168,6 @@ public class MMUModel extends Observable implements Model
 			this.numProcesses = processes.size();
 			MMULogger.getInstance().write("PN: " + this.numProcesses, Level.INFO);
 			MMULogger.getInstance().write(EMPTY_STRING, Level.INFO);
-			/// TODO uncomment
 			runProcesses(processes);
 			HardDisk.getInstance().recreateHdFile();
 			setChanged();

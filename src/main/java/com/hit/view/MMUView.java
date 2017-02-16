@@ -6,22 +6,31 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Set;
+import java.util.logging.Level;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.hit.util.MMULogger;
+
 public class MMUView extends Observable implements View 
 {
 	public static final int BYTES_IN_PAGE = 5;
 	public static final int NUM_MMU_PAGES = 1;
-	private static final String EMPTY_STRING = "";
+	private final String EMPTY_STRING = "";
+	private final String PAGE_FAULT_COMMAND = "PF";
+	private final String PAGE_REPLACEMENT_COMMAND = "PR";
+	private final String GET_PAGES_COMMAND = "GP";
+	private final String DONE_MESSAGE = "Done!";
 	private int ramCapacity;
 	private int currentCommandToPlayIndex;
 	private int ramIndex;
@@ -30,7 +39,7 @@ public class MMUView extends Observable implements View
 	private boolean isRamFull;
 	private Map<String, String> pageReplacementMap;
 	private Map<String, Integer> pageLocationInRamMap;
-	private Map<String, String> indexOfProcessesInRamMap;
+	private Map<String, TableProperties> actualRamTableMap;
 	private List<String> processsesCurrentlySelected;
 	private List<String> commands;
 	private JFrame frame;
@@ -50,7 +59,7 @@ public class MMUView extends Observable implements View
 		this.processsesCurrentlySelected = new ArrayList<>();
 		this.pageReplacementMap = new HashMap<>();
 		this.pageLocationInRamMap = new HashMap<>();
-		this.indexOfProcessesInRamMap = new HashMap<>();
+		this.actualRamTableMap = new HashMap<>();
 	}
 	
 	@Override
@@ -137,12 +146,11 @@ public class MMUView extends Observable implements View
 			if(currentCommandToPlayIndex < this.commands.size())
 				processCommand();
 			else
-				JOptionPane.showMessageDialog(null, "Done");
+				JOptionPane.showMessageDialog(null, DONE_MESSAGE);
 		} 
 		catch (IOException e) 
 		{
-			/// TODO use MMULogger
-			e.printStackTrace();
+			MMULogger.getInstance().write(e.getMessage(), Level.SEVERE);
 		}
 	}
 	
@@ -150,12 +158,29 @@ public class MMUView extends Observable implements View
 	{
 		while(currentCommandToPlayIndex < this.commands.size())
 			playButton_Clicked();
-		JOptionPane.showMessageDialog(null, "Done");
+		JOptionPane.showMessageDialog(null, DONE_MESSAGE);
 	}
 	
 	public void processesList_Clicked(List<String> processesPicked)
 	{
 		this.processsesCurrentlySelected = processesPicked;
+		showDataRelevantToSelectedProcesses();
+	}
+	
+	private void showDataRelevantToSelectedProcesses()
+	{
+		int index;
+		TableProperties currentData;
+		
+		for(Entry<String, TableProperties> entry : this.actualRamTableMap.entrySet())
+		{
+			currentData = entry.getValue();
+			index = currentData.getIndex();
+			if(this.processsesCurrentlySelected.contains(currentData.getProcessName()))
+				updateViewedRamTable(index, entry.getKey(), currentData.getData());
+			else
+				clearValuesInViewedRamTable(index);
+		}
 	}
 	
 	private void processCommand() throws IOException
@@ -163,12 +188,11 @@ public class MMUView extends Observable implements View
 		String currentCommand;
 		
 		currentCommand = this.commands.get(this.currentCommandToPlayIndex++);
-		System.out.println(currentCommand);
-		if(currentCommand.startsWith("PF"))
+		if(currentCommand.startsWith(PAGE_FAULT_COMMAND))
 			this.counters.getPageFaultTextField().setText(Integer.toString(++this.pageFaultCounter));
-		else if(currentCommand.startsWith("PR"))
+		else if(currentCommand.startsWith(PAGE_REPLACEMENT_COMMAND))
 			handlePageReplacementCommand(currentCommand);
-		else if(currentCommand.startsWith("GP"))
+		else if(currentCommand.startsWith(GET_PAGES_COMMAND))
 			handleGetPagesCommand(currentCommand);
 		else
 			throw new IOException();
@@ -185,25 +209,67 @@ public class MMUView extends Observable implements View
 
 	private void handleGetPagesCommand(String currentCommand) 
 	{
+		int index;
 		String currentProcess;
 		String currentPage;
 		String currentData;
 		String[] splittedCommand;
+		List<String> dataAsList;
 		
-		currentCommand = currentCommand.replace("GP: ", EMPTY_STRING);
+		currentCommand = currentCommand.replace(GET_PAGES_COMMAND + ": ", EMPTY_STRING);
 		splittedCommand = currentCommand.split(" ");
 		currentProcess = getProcessID(splittedCommand[0]);
 		currentPage = splittedCommand[1];
 		currentData = getDataAsString(currentCommand);
-		if(/*this.processsesCurrentlySelected.contains("Process" + currentProcess) && */!doesPageExistInRam(currentPage))
+		if(!doesPageExistInRam(currentPage))
 		{
 			checkIfRamIsFull();
 			this.pageLocationInRamMap.put(currentPage, ramIndex);
-			this.table.getRamTable().getTableHeader().getColumnModel().getColumn(getRamIndex(currentPage)).setHeaderValue(currentPage);
-			this.table.getRamTable().getTableHeader().repaint();
-			setDataForPage(getDataAsList(currentData));
+			index = getRamIndex(currentPage);
+			dataAsList = getDataAsList(currentData);
+			updateActualTable(currentPage, index, currentProcess, dataAsList);
 			increaseRamIndexIfNeeded();
+			if(this.processsesCurrentlySelected.contains("Process" + currentProcess))
+				updateViewedRamTable(index, currentPage, dataAsList);
 		}
+	}
+
+	private void updateViewedRamTable(int index, String currentPage, List<String> dataAsList) 
+	{
+		this.table.getRamTable().getTableHeader().getColumnModel().getColumn(index).setHeaderValue(currentPage);
+		this.table.getRamTable().getTableHeader().repaint();
+		setDataForPage(dataAsList, index);
+	}
+	
+	private void clearValuesInViewedRamTable(int index) 
+	{
+		List<String> zeroArray = createAndInitializeDataArray();
+		
+		this.table.getRamTable().getTableHeader().getColumnModel().getColumn(index).setHeaderValue(0);
+		this.table.getRamTable().getTableHeader().repaint();
+		setDataForPage(zeroArray, index);
+	}
+
+	private List<String> createAndInitializeDataArray() 
+	{
+		List<String> zeroArray = new ArrayList<>();
+		
+		for(int i = 0; i < BYTES_IN_PAGE; i++)
+			zeroArray.add("0");
+		
+		return zeroArray;
+	}
+
+	private TableProperties updateActualTable(String currentPage, int index, String currentProcess, List<String> dataAsList) 
+	{
+		TableProperties tableProperties = new TableProperties();
+		
+		tableProperties.setIndex(index);
+		tableProperties.setProcessName("Process" + currentProcess);
+		tableProperties.setData(dataAsList);
+		this.actualRamTableMap.put(currentPage, tableProperties);
+		
+		return tableProperties;
 	}
 
 	private void checkIfRamIsFull() 
@@ -221,11 +287,14 @@ public class MMUView extends Observable implements View
 	private int getRamIndex(String currentPage)
 	{
 		int index;
+		String pageNumberToRemove;
 		
 		if(this.isRamFull)
 		{
-			index = this.pageLocationInRamMap.get(pageReplacementMap.get(currentPage));
-			this.pageLocationInRamMap.remove(pageReplacementMap.get(currentPage));
+			pageNumberToRemove = pageReplacementMap.get(currentPage);
+			index = this.pageLocationInRamMap.get(pageNumberToRemove);
+			this.pageLocationInRamMap.remove(pageNumberToRemove);
+			this.actualRamTableMap.remove(pageNumberToRemove);
 			this.pageLocationInRamMap.put(currentPage, index);
 			this.ramIndex = index;
 		}
@@ -240,7 +309,7 @@ public class MMUView extends Observable implements View
 		boolean pageExistInRam = false;
 		
 		for(int i = 0; i < this.ramCapacity; i++)
-			if(this.table.getRamTable().getTableHeader().getColumnModel().getColumn(i).getHeaderValue().equals(pageNumber))
+			if(this.actualRamTableMap.containsKey(pageNumber))
 				pageExistInRam = true;
 		
 		return pageExistInRam;
@@ -264,18 +333,15 @@ public class MMUView extends Observable implements View
 		String newString = str;
 		String[] data;
 		
-		newString = newString.replace("\\[", EMPTY_STRING);
-		newString = newString.replace("]", EMPTY_STRING);
-		newString = newString.replaceAll(",", EMPTY_STRING);
 		data = newString.split(" ");
 		
 		return Arrays.asList(data);
 	}
 	
-	private void setDataForPage(List<String> data)
+	private void setDataForPage(List<String> data, int index)
 	{
 		for(int i = 0; i < BYTES_IN_PAGE; i++)
-			this.table.getRamTable().getModel().setValueAt(data.get(i), i, ramIndex);
+			this.table.getRamTable().getModel().setValueAt(data.get(i), i, index);
 		this.table.centerDataInCells();
 	}
 }
