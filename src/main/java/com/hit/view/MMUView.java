@@ -236,17 +236,18 @@ public class MMUView extends Observable implements View
 				updateViewedRamTable(index, currentPage, dataAsList);
 		}
 		else
-			updateDataIfDifferent(currentPage, dataAsList);
+			updateDataIfDifferent(currentPage, dataAsList, currentProcess);
 	}
 
-	private void updateDataIfDifferent(String currentPage, List<String> currentData) 
+	private void updateDataIfDifferent(String currentPage, List<String> currentData, String currentProcess) 
 	{
 		TableProperties propertiesForPage;
 		
 		propertiesForPage = this.actualRamTableMap.get(currentPage);
 		if(!propertiesForPage.getData().equals(currentData))
 		{
-			setDataForPage(currentData, propertiesForPage.getIndex());
+			if(this.processsesCurrentlySelected.contains("Process" + currentProcess))
+				setDataForPage(currentData, propertiesForPage.getIndex());
 			this.actualRamTableMap.get(currentPage).setData(currentData);
 		}
 	}
