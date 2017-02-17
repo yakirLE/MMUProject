@@ -112,7 +112,7 @@ public class MMUView extends Observable implements View
         createPanelWithConstraints(list, GridBagConstraints.LINE_START, 0, 0, 0, 0, 0, 0, new Insets(130, 20, 20, 0), GridBagConstraints.NONE);
         createPanelWithConstraints(buttons, GridBagConstraints.CENTER, 0, 0, 0, 0, 0, 0, new Insets(0, 200, 0, 300), GridBagConstraints.NONE);
         createPanelWithConstraints(counters, GridBagConstraints.LINE_END, 0, 0, 0, 0, 0, 0, new Insets(0, 0, 0, 40), GridBagConstraints.NONE);
-        createPanelWithConstraints(currentCommands, GridBagConstraints.PAGE_END, 0, 3, 0, 0, 0, 0, new Insets(0, 0, 10, 0), GridBagConstraints.NONE);
+        createPanelWithConstraints(currentCommands, GridBagConstraints.PAGE_END, 0, 0, 0, 0, 0, 0, new Insets(0, 0, 10, 0), GridBagConstraints.NONE);
         frame.pack();
 	}
 	
@@ -207,11 +207,13 @@ public class MMUView extends Observable implements View
 
 	private void handlePageReplacementCommand(String currentCommand) 
 	{
+		final int PAGE_TO_HD_INDEX = 2;
+		final int PAGE_TO_RAM_INDEX = 4;
 		String[] pagesToReplace;
 		
 		this.counters.getPageReplacementTextField().setText(Integer.toString(++this.pageReplacementCounter));
 		pagesToReplace = currentCommand.split(SPACE_STRING);
-		this.pageReplacementMap.put(pagesToReplace[4], pagesToReplace[2]);
+		this.pageReplacementMap.put(pagesToReplace[PAGE_TO_RAM_INDEX], pagesToReplace[PAGE_TO_HD_INDEX]);
 	}
 
 	private void handleGetPagesCommand(String currentCommand) 
