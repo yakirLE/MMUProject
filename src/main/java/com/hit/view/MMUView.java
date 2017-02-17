@@ -25,16 +25,19 @@ public class MMUView extends Observable implements View
 	public static final int BYTES_IN_PAGE = 5;
 	public static final int NUM_MMU_PAGES = 1;
 	private final String EMPTY_STRING = "";
+	private final String SPACE_STRING = " ";
 	private final String PAGE_FAULT_COMMAND = "PF";
 	private final String PAGE_REPLACEMENT_COMMAND = "PR";
 	private final String GET_PAGES_COMMAND = "GP";
 	private final String DONE_MESSAGE = "Done!";
+	private final String PREFIX_FOR_PROCESS_IN_LIST = "Process";
 	private int ramCapacity;
 	private int currentCommandToPlayIndex;
 	private int ramIndex;
 	private int pageFaultCounter;
 	private int pageReplacementCounter;
 	private boolean isRamFull;
+	private List<String> emptyArray;
 	private Map<String, String> pageReplacementMap;
 	private Map<String, Integer> pageLocationInRamMap;
 	private Map<String, TableProperties> actualRamTableMap;
@@ -59,6 +62,7 @@ public class MMUView extends Observable implements View
 		this.pageReplacementMap = new HashMap<>();
 		this.pageLocationInRamMap = new HashMap<>();
 		this.actualRamTableMap = new HashMap<>();
+		createAndInitializeDataArray();
 	}
 	
 	@Override
@@ -83,6 +87,7 @@ public class MMUView extends Observable implements View
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setLayout(new GridBagLayout());
+        frame.setVisible(true);
 	}
 	
 	public void setConfiguration(List<String> commands)
@@ -109,7 +114,6 @@ public class MMUView extends Observable implements View
         createPanelWithConstraints(counters, GridBagConstraints.LINE_END, 0, 0, 0, 0, 0, 0, new Insets(0, 0, 0, 40), GridBagConstraints.NONE);
         createPanelWithConstraints(currentCommands, GridBagConstraints.PAGE_END, 0, 3, 0, 0, 0, 0, new Insets(0, 0, 10, 0), GridBagConstraints.NONE);
         frame.pack();
-        frame.setVisible(true);
 	}
 	
 	private void createPanelWithConstraints(JPanel panel, int anchor, int gridx, int gridy, double weightx, double weighty, 
@@ -135,7 +139,7 @@ public class MMUView extends Observable implements View
 		
 		names = new String[processesNumber];
 		for(int i = 0; i < processesNumber; i++)
-			names[i] = "Process" + i;
+			names[i] = PREFIX_FOR_PROCESS_IN_LIST + i;
 		this.processsesCurrentlySelected = Arrays.asList(names);
 		
 		return names;
@@ -206,7 +210,7 @@ public class MMUView extends Observable implements View
 		String[] pagesToReplace;
 		
 		this.counters.getPageReplacementTextField().setText(Integer.toString(++this.pageReplacementCounter));
-		pagesToReplace = currentCommand.split(" ");
+		pagesToReplace = currentCommand.split(SPACE_STRING);
 		this.pageReplacementMap.put(pagesToReplace[4], pagesToReplace[2]);
 	}
 
@@ -220,7 +224,7 @@ public class MMUView extends Observable implements View
 		List<String> dataAsList;
 		
 		currentCommand = currentCommand.replace(GET_PAGES_COMMAND + ": ", EMPTY_STRING);
-		splittedCommand = currentCommand.split(" ");
+		splittedCommand = currentCommand.split(SPACE_STRING);
 		currentProcess = getProcessID(splittedCommand[0]);
 		currentPage = splittedCommand[1];
 		currentData = getDataAsString(currentCommand);
@@ -232,7 +236,7 @@ public class MMUView extends Observable implements View
 			index = getRamIndex(currentPage);
 			updateActualTable(currentPage, index, currentProcess, dataAsList);
 			increaseRamIndexIfNeeded();
-			if(this.processsesCurrentlySelected.contains("Process" + currentProcess))
+			if(this.processsesCurrentlySelected.contains(PREFIX_FOR_PROCESS_IN_LIST + currentProcess))
 				updateViewedRamTable(index, currentPage, dataAsList);
 		}
 		else
@@ -246,36 +250,29 @@ public class MMUView extends Observable implements View
 		propertiesForPage = this.actualRamTableMap.get(currentPage);
 		if(!propertiesForPage.getData().equals(currentData))
 		{
-			if(this.processsesCurrentlySelected.contains("Process" + currentProcess))
-				setDataForPage(currentData, propertiesForPage.getIndex());
+			if(this.processsesCurrentlySelected.contains(PREFIX_FOR_PROCESS_IN_LIST + currentProcess))
+				this.table.fillColumn(propertiesForPage.getIndex(), currentData);
 			this.actualRamTableMap.get(currentPage).setData(currentData);
 		}
 	}
 
 	private void updateViewedRamTable(int index, String currentPage, List<String> dataAsList) 
 	{
-		this.table.getRamTable().getTableHeader().getColumnModel().getColumn(index).setHeaderValue(currentPage);
-		this.table.getRamTable().getTableHeader().repaint();
-		setDataForPage(dataAsList, index);
+		this.table.updateHeader(index, currentPage);
+		this.table.fillColumn(index, dataAsList);
 	}
 	
 	private void clearValuesInViewedRamTable(int index) 
 	{
-		List<String> zeroArray = createAndInitializeDataArray();
-		
-		this.table.getRamTable().getTableHeader().getColumnModel().getColumn(index).setHeaderValue(0);
-		this.table.getRamTable().getTableHeader().repaint();
-		setDataForPage(zeroArray, index);
+		this.table.updateHeader(index, EMPTY_STRING);
+		this.table.fillColumn(index, emptyArray);
 	}
 
-	private List<String> createAndInitializeDataArray() 
+	private void createAndInitializeDataArray() 
 	{
-		List<String> zeroArray = new ArrayList<>();
-		
+		this.emptyArray = new ArrayList<>();
 		for(int i = 0; i < BYTES_IN_PAGE; i++)
-			zeroArray.add("0");
-		
-		return zeroArray;
+			this.emptyArray.add(EMPTY_STRING);
 	}
 
 	private TableProperties updateActualTable(String currentPage, int index, String currentProcess, List<String> dataAsList) 
@@ -283,7 +280,7 @@ public class MMUView extends Observable implements View
 		TableProperties tableProperties = new TableProperties();
 		
 		tableProperties.setIndex(index);
-		tableProperties.setProcessName("Process" + currentProcess);
+		tableProperties.setProcessName(PREFIX_FOR_PROCESS_IN_LIST + currentProcess);
 		tableProperties.setData(dataAsList);
 		this.actualRamTableMap.put(currentPage, tableProperties);
 		
@@ -352,14 +349,8 @@ public class MMUView extends Observable implements View
 		String newString = str;
 		String[] data;
 		
-		data = newString.split(" ");
+		data = newString.split(SPACE_STRING);
 		
 		return Arrays.asList(data);
-	}
-	
-	private void setDataForPage(List<String> data, int index)
-	{
-		for(int i = 0; i < BYTES_IN_PAGE; i++)
-			this.table.getRamTable().getModel().setValueAt(data.get(i), i, index);
 	}
 }

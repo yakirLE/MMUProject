@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -15,6 +16,7 @@ public class RamPanel extends JPanel
 	private int ramCapacity;
 	private int dataSize;
 	private JTable table;
+	private DefaultTableCellRenderer centerRenderer;
 	
 	public RamPanel(int ramCapacity, int dataSize) 
 	{
@@ -26,17 +28,24 @@ public class RamPanel extends JPanel
 		add(table.getTableHeader(), BorderLayout.PAGE_START);
 		add(table);
 	}
-
-	public JTable getRamTable()
+	
+	private void centerDataInCells()
 	{
-		return this.table;
+		this.centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+		table.setDefaultRenderer(Integer.class, this.centerRenderer);
 	}
 	
-	public void centerDataInCells()
+	public void updateHeader(int index, String text)
 	{
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		
-		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-		table.setDefaultRenderer(Integer.class, centerRenderer);
+		this.table.getTableHeader().getColumnModel().getColumn(index).setHeaderValue(text);
+		this.table.getTableHeader().repaint();
+	}
+	
+	public void fillColumn(int index, List<String> data)
+	{
+		for(int i = 0; i < this.dataSize; i++)
+			this.table.getModel().setValueAt(data.get(i), i, index);
+		this.table.getColumnModel().getColumn(index).setCellRenderer(this.centerRenderer);
 	}
 }

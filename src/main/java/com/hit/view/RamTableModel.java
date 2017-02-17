@@ -21,7 +21,7 @@ public class RamTableModel extends AbstractTableModel
 		data = new Object[rows][cols];
 		for(int i = 0; i < rows; i++)
 			for(int j = 0; j < cols; j++)
-				data[i][j] = new Integer(0);
+				data[i][j] = "";
 	}
 		
 	@Override
