@@ -6,13 +6,11 @@ import java.awt.Insets;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Observable;
-import java.util.Set;
 import java.util.logging.Level;
 
 import javax.swing.JFrame;
@@ -47,6 +45,7 @@ public class MMUView extends Observable implements View
 	private CountersPanel counters;
 	private ButtonsPanel buttons;
 	private ListPanel list;
+	private CommandsPanel currentCommands;
 	
 	public MMUView()
 	{
@@ -102,10 +101,13 @@ public class MMUView extends Observable implements View
         buttons.setOpaque(true);
         list = new ListPanel(this, getProcessesAndInitializeCurrentlySelectedProcesses(processesAmount));
         list.setOpaque(true);
+        currentCommands = new CommandsPanel();
+        currentCommands.setOpaque(true);
         createPanelWithConstraints(table, GridBagConstraints.FIRST_LINE_START, 0, 0, 0, 0, 0, 0, new Insets(20, 0, 0, 0), GridBagConstraints.HORIZONTAL);
         createPanelWithConstraints(list, GridBagConstraints.LINE_START, 0, 0, 0, 0, 0, 0, new Insets(130, 20, 20, 0), GridBagConstraints.NONE);
         createPanelWithConstraints(buttons, GridBagConstraints.CENTER, 0, 0, 0, 0, 0, 0, new Insets(0, 200, 0, 300), GridBagConstraints.NONE);
-        createPanelWithConstraints(counters, GridBagConstraints.LINE_END, 0, 0, 0, 0, 0, 0, new Insets(0, 0, 0, 20), GridBagConstraints.NONE);
+        createPanelWithConstraints(counters, GridBagConstraints.LINE_END, 0, 0, 0, 0, 0, 0, new Insets(0, 0, 0, 40), GridBagConstraints.NONE);
+        createPanelWithConstraints(currentCommands, GridBagConstraints.PAGE_END, 0, 3, 0, 0, 0, 0, new Insets(0, 0, 10, 0), GridBagConstraints.NONE);
         frame.pack();
         frame.setVisible(true);
 	}
@@ -188,6 +190,7 @@ public class MMUView extends Observable implements View
 		String currentCommand;
 		
 		currentCommand = this.commands.get(this.currentCommandToPlayIndex++);
+		this.currentCommands.setText(currentCommand);
 		if(currentCommand.startsWith(PAGE_FAULT_COMMAND))
 			this.counters.getPageFaultTextField().setText(Integer.toString(++this.pageFaultCounter));
 		else if(currentCommand.startsWith(PAGE_REPLACEMENT_COMMAND))
@@ -221,17 +224,28 @@ public class MMUView extends Observable implements View
 		currentProcess = getProcessID(splittedCommand[0]);
 		currentPage = splittedCommand[1];
 		currentData = getDataAsString(currentCommand);
+		dataAsList = getDataAsList(currentData);
 		if(!doesPageExistInRam(currentPage))
 		{
 			checkIfRamIsFull();
 			this.pageLocationInRamMap.put(currentPage, ramIndex);
 			index = getRamIndex(currentPage);
-			dataAsList = getDataAsList(currentData);
 			updateActualTable(currentPage, index, currentProcess, dataAsList);
 			increaseRamIndexIfNeeded();
 			if(this.processsesCurrentlySelected.contains("Process" + currentProcess))
 				updateViewedRamTable(index, currentPage, dataAsList);
 		}
+		else
+			updateDataIfDifferent(currentPage, dataAsList);
+	}
+
+	private void updateDataIfDifferent(String currentPage, List<String> currentData) 
+	{
+		TableProperties propertiesForPage;
+		
+		propertiesForPage = this.actualRamTableMap.get(currentPage);
+		if(!propertiesForPage.getData().equals(currentData))
+			setDataForPage(currentData, propertiesForPage.getIndex());
 	}
 
 	private void updateViewedRamTable(int index, String currentPage, List<String> dataAsList) 
