@@ -245,7 +245,10 @@ public class MMUView extends Observable implements View
 		
 		propertiesForPage = this.actualRamTableMap.get(currentPage);
 		if(!propertiesForPage.getData().equals(currentData))
+		{
 			setDataForPage(currentData, propertiesForPage.getIndex());
+			this.actualRamTableMap.get(currentPage).setData(currentData);
+		}
 	}
 
 	private void updateViewedRamTable(int index, String currentPage, List<String> dataAsList) 
