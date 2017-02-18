@@ -24,7 +24,7 @@ public class MemoryManagementUnit
 	@SuppressWarnings("unchecked")
 	public synchronized Page<byte[]>[] getPages(Long[] pageIds) throws IOException
 	{
-		final int firstElement = 0;
+		final int FIRST_ELEMENT = 0;
 		List<Long> keysOfRemoveablePages;
 		List<Long> keys = Arrays.asList(pageIds);
 		List<Page<byte[]>> requestedPages = new ArrayList<>();
@@ -50,8 +50,8 @@ public class MemoryManagementUnit
 			}
 			else
 			{
-				pageToHd = this.ram.getPage(keysOfRemoveablePages.get(firstElement));
-				keysOfRemoveablePages.remove(firstElement);
+				pageToHd = this.ram.getPage(keysOfRemoveablePages.get(FIRST_ELEMENT));
+				keysOfRemoveablePages.remove(FIRST_ELEMENT);
 				newPage = HardDisk.getInstance().pageReplacement(pageToHd, key);
 				this.ram.removePage(pageToHd);
 				this.ram.addPage(newPage);
